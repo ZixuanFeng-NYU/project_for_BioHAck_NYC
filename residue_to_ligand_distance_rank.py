@@ -48,21 +48,26 @@ for pdb_folder in refined_set_folder:
     parser = PDB.PDBParser(QUIET=True)
     structure = parser.get_structure("protein", pocket_file)
 
-    # Create a dictionary to store residue central mass distances
-    residue_distances = {}
+    # Create a dictionary to store residue central mass distances and types
+    residue_data = {}
 
-    # Calculate and store the central mass coordinate for each residue
+    # Calculate and store the central mass coordinate and residue type for each residue
     for model in structure:
         for chain in model:
             for residue in chain:
                 central_mass = calculate_com(np.array([atom.get_coord() for atom in residue.get_atoms()]))
                 if central_mass is not None:
-                    residue_distances[residue.get_id()] = calculate_distance(central_mass, ligand_com)
+                    residue_data[residue.get_id()] = {
+                        'distance': calculate_distance(central_mass, ligand_com),
+                        'type': residue.get_resname()
+                    }
+
 
     # Sort the residues by distance to the ligand central mass
-    sorted_residues = sorted(residue_distances.items(), key=lambda x: x[1])
+    sorted_residues = sorted(residue_data.items(), key=lambda x: x[1]['distance'])
 
-    # Print the ranked residues
+    # Print the ranked residues with both distance and type
     print(f"Ranking of residues based on distance to ligand central mass in {pdb_folder}:")
-    for rank, (residue_id, distance) in enumerate(sorted_residues, start=1):
-        print(f"Rank {rank}: Residue {residue_id}, Distance = {distance}")
+    for rank, (residue_id, data) in enumerate(sorted_residues, start=1):
+        print(f"Rank {rank}: Residue {residue_id}, Type = {data['type']}, Distance = {data['distance']}")
+
