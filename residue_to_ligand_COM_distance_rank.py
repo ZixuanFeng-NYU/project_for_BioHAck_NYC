@@ -55,12 +55,13 @@ for pdb_folder in refined_set_folder:
     for model in structure:
         for chain in model:
             for residue in chain:
-                central_mass = calculate_com(np.array([atom.get_coord() for atom in residue.get_atoms()]))
-                if central_mass is not None:
-                    residue_data[residue.get_id()] = {
-                        'distance': calculate_distance(central_mass, ligand_com),
-                        'type': residue.get_resname()
-                    }
+                if residue.get_resname()!="HOH":
+                    central_mass = calculate_com(np.array([atom.get_coord() for atom in residue.get_atoms()]))
+                    if central_mass is not None:
+                        residue_data[residue.get_id()] = {
+                            'distance': calculate_distance(central_mass, ligand_com),
+                            'type': residue.get_resname()
+                        }
 
 
     # Sort the residues by distance to the ligand central mass
@@ -70,4 +71,3 @@ for pdb_folder in refined_set_folder:
     print(f"Ranking of residues based on distance to ligand central mass in {pdb_folder}:")
     for rank, (residue_id, data) in enumerate(sorted_residues, start=1):
         print(f"Rank {rank}: Residue {residue_id}, Type = {data['type']}, Distance = {data['distance']}")
-
